@@ -141,6 +141,13 @@ type Pool @entity {
   ticks: [Tick!]! @derivedFrom(field: "pool")
 }
 
+type PoolLiquidityProvider @entity {
+  id: ID!
+  pool: Pool!
+  owner: Bytes!
+  liquidity: BigInt!
+}
+
 type Tick @entity {
   # format: <pool address>#<tick index>
   id: ID!

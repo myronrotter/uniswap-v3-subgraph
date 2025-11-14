@@ -1,9 +1,10 @@
 import { Address, BigInt } from '@graphprotocol/graph-ts'
 
-import { Bundle, Burn, Factory, Pool, Tick, Token } from '../../../generated/schema'
+import { store } from '@graphprotocol/graph-ts'
+import { Bundle, Burn, Factory, Pool, PoolLiquidityProvider, Tick, Token } from '../../../generated/schema'
 import { Burn as BurnEvent } from '../../../generated/templates/Pool/Pool'
 import { FACTORY_ADDRESS } from '../../common/chain'
-import { ONE_BI } from '../../common/constants'
+import { ONE_BI, ZERO_BI } from '../../common/constants'
 import { convertTokenToDecimal } from '../../common/utils'
 import {
   updatePoolDayData,
@@ -89,6 +90,19 @@ export function handleBurn(event: BurnEvent): void {
       lowerTick.save()
       upperTick.save()
     }
+
+    const providerId = pool.id.toHexString() + '-' + event.params.owner.toHexString()
+    const lp = PoolLiquidityProvider.load(providerId)
+    if (lp) {
+      lp.liquidity = lp.liquidity.minus(event.params.amount)
+      if (lp.liquidity.le(ZERO_BI)) {
+        store.remove('PoolLiquidityProvider', providerId)
+        pool.liquidityProviderCount = pool.liquidityProviderCount.minus(ONE_BI)
+      } else {
+        lp.save()
+      }
+    }
+
     updateUniswapDayData(event, factoryAddress.toHexString())
     updatePoolDayData(event)
     updatePoolHourData(event)
