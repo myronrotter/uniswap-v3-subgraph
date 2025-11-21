@@ -1,4 +1,5 @@
-import { Collect, Initialize, Mint, Swap } from '../../../generated/templates/Pool/Pool'
+import { Burn, Collect, Initialize, Mint, Swap } from '../../../generated/templates/Pool/Pool'
+import { handleBurn as handleBurnHelper } from './burn'
 import { handleCollect as handleCollectHelper } from './collect'
 import { handleInitialize as handleInitializeHelper } from './initialize'
 import { handleMint as handleMintHelper } from './mint'
@@ -15,6 +16,10 @@ export function handleMint(event: Mint): void {
 
 export function handleSwap(event: Swap): void {
   handleSwapHelper(event)
+}
+
+export function handleBurn(event: Burn): void {
+  handleBurnHelper(event)
 }
 
 export function handleCollect(event: Collect): void {

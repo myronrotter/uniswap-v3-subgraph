@@ -1,6 +1,6 @@
 import { Address, BigInt } from '@graphprotocol/graph-ts'
 
-import { Bundle, Factory, Mint, Pool, Tick, Token } from '../../../generated/schema'
+import { Bundle, Factory, Mint, Pool, PoolLiquidityProvider, Tick, Token } from '../../../generated/schema'
 import { Mint as MintEvent } from '../../../generated/templates/Pool/Pool'
 import { FACTORY_ADDRESS } from '../../common/chain'
 import { ONE_BI } from '../../common/constants'
@@ -131,6 +131,19 @@ export function handleMint(event: MintEvent): void {
 
     token0.save()
     token1.save()
+
+    const providerId = pool.id.toHexString() + '-' + event.params.owner.toHexString()
+    let lp = PoolLiquidityProvider.load(providerId)
+    if (lp === null) {
+      lp = new PoolLiquidityProvider(providerId)
+      lp.pool = pool.id
+      lp.owner = event.params.owner
+      lp.liquidity = event.params.amount
+      pool.liquidityProviderCount = pool.liquidityProviderCount.plus(ONE_BI)
+    } else {
+      lp.liquidity = lp.liquidity.plus(event.params.amount)
+    }
+    lp.save()
     pool.save()
     factory.save()
     mint.save()

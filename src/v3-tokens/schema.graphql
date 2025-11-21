@@ -159,6 +159,13 @@ type Pool @entity {
   liquidityProviderCount: BigInt! # used to detect new exchanges
 }
 
+type PoolLiquidityProvider @entity {
+  id: ID!
+  pool: Pool!
+  owner: Bytes!
+  liquidity: BigInt!
+}
+
 type TokenDayData @entity {
   # token address concatendated with date
   id: ID!
